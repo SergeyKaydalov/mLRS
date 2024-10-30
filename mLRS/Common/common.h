@@ -25,6 +25,10 @@
 #include "fan.h"
 #include "leds.h"
 
+#ifdef DEVICE_TGT_LINUX
+#include "hal/linux/serial.h"
+#endif
+
 
 //-------------------------------------------------------
 // Serial Classes
@@ -53,6 +57,16 @@ extern tRxDroneCan dronecan;
 static bool ser_not_can = true;
 #endif
 
+
+#ifdef DEVICE_TGT_LINUX
+class tSerialPort : public tLinuxSerialBase
+{
+public:
+    tSerialPort()
+    : tLinuxSerialBase(SERIAL_PORT_NAME)
+    { }
+};
+#else
 class tSerialPort : public tSerialBase
 {
 #if defined DEVICE_IS_TRANSMITTER && defined USE_SERIAL
@@ -65,8 +79,6 @@ class tSerialPort : public tSerialBase
     char getc(void) override { IFNSER(0); return usb_getc(); }
     void flush(void) override { IFNSER(); usb_flush(); }
     uint16_t bytes_available(void) override { IFNSER(0); return usb_rx_bytesavailable(); }
-#elif defined DEVICE_TGT_LINUX
-    /* TODO: implement it for Linux */
 #else
     void Init(void) override { uartb_init(); SERORCOM_INIT; }
     void SetBaudRate(uint32_t baud) override { IFNSER(); uartb_setprotocol(baud, XUART_PARITY_NO, UART_STOPBIT_1); }
@@ -78,6 +90,7 @@ class tSerialPort : public tSerialBase
     bool has_systemboot(void) override { return uartb_has_systemboot(); }
 #endif
 #endif
+
 #ifdef DEVICE_IS_RECEIVER
   public:
 #if defined USE_SERIAL && defined DEVICE_HAS_DRONECAN
@@ -112,9 +125,18 @@ class tSerialPort : public tSerialBase
 #endif
 #endif
 };
-
+#endif
 
 // is always uartf (or swuart)
+#ifdef DEVICE_TGT_LINUX
+class tDebugPort : public tLinuxDebugBase
+{
+public:
+    tDebugPort():
+    tLinuxDebugBase()
+        { }
+};
+#else
 class tDebugPort : public tSerialBase
 {
 #ifdef USE_DEBUG
@@ -122,16 +144,25 @@ class tDebugPort : public tSerialBase
 #ifdef DEVICE_HAS_DEBUG_SWUART
     void Init(void) { swuart_init(); }
     void putbuf(uint8_t* const buf, uint16_t len) override { swuart_putbuf(buf, len); }
-#elif defined DEVICE_TGT_LINUX
 #else
     void Init(void) { uartf_init(); }
     void putbuf(uint8_t* const buf, uint16_t len) override { uartf_putbuf(buf, len); }
 #endif
 #endif
 };
+#endif
 
 
 // is uartc or uartb (or usb)
+#ifdef DEVICE_TGT_LINUX
+class tComPort : public tLinuxSerialBase
+{
+public:
+    tComPort():
+    tLinuxSerialBase(COM_PORT_NAME)
+    {}
+};
+#else
 class tComPort : public tSerialBase
 {
 #ifdef USE_COM_ON_SERIAL
@@ -166,6 +197,7 @@ class tComPort : public tSerialBase
 #endif
 #endif
 };
+#endif
 
 
 // is always uartd

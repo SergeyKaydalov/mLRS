@@ -375,6 +375,8 @@ The default selection of frequency bands can be overruled by feature defines.
   #define DEVICE_NAME "LINUX-based TX"
   #define DEVICE_IS_TRANSMITTER
   #define DEVICE_HAS_NO_SX
+  #define DEVICE_HAS_SERIAL_OR_COM
+  #define DEBUG_ENABLED
   #define DEVICE_TGT_LINUX
 #endif
 

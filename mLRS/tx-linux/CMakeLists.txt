@@ -25,6 +25,12 @@ set(SOURCE_FILES
 #include_directories("/usr/include/libdrm" "/usr/include/cairo")
 
 #configure_file("${PROJECT_NAME}_config.h.in" "${PROJECT_NAME}_config.h")
+set(
+  CMAKE_CXX_FLAGS
+  "${CMAKE_CXX_FLAGS} -g -O0 -Werror -fsanitize=undefined -fsanitize=address"
+)
+
+set(CMAKE_VERBOSE_MAKEFILE ON)
 
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
 add_compile_definitions(TX_DIY_LINUX)

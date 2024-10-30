@@ -18,44 +18,43 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "../Inc/main.h"
+#include <iostream>
+#include <chrono>
+#include <thread>
+#include <utility>
+#include <cassert>
 
-/* Private includes ----------------------------------------------------------*/
-/* USER CODE BEGIN Includes */
+/* The systick source */
+volatile uint32_t doSysTask;
+volatile uint32_t uwTick;
+class tThTimer
+{
+  bool tht_term { false };
+  std::thread tht_thread;
 
-/* USER CODE END Includes */
+  void thread_func()
+    {
+      while(!tht_term)
+      {
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+        uwTick += 1;
+        doSysTask++;
+      }
+    }
+public:
+  tThTimer()
+  : tht_thread(&tThTimer::thread_func, this)
+    { }
 
-/* Private typedef -----------------------------------------------------------*/
-/* USER CODE BEGIN PTD */
+    ~tThTimer()
+      {
+        tht_term = true;
+        tht_thread.join();
+      }
+  };
 
-/* USER CODE END PTD */
 
-/* Private define ------------------------------------------------------------*/
-/* USER CODE BEGIN PD */
-
-/* USER CODE END PD */
-
-/* Private macro -------------------------------------------------------------*/
-/* USER CODE BEGIN PM */
-
-/* USER CODE END PM */
-
-/* Private variables ---------------------------------------------------------*/
-
-/* USER CODE BEGIN PV */
-
-/* USER CODE END PV */
-
-/* Private function prototypes -----------------------------------------------*/
-void SystemClock_Config(void);
-static void MX_GPIO_Init(void);
-/* USER CODE BEGIN PFP */
 int main_main();
-/* USER CODE END PFP */
-
-/* Private user code ---------------------------------------------------------*/
-/* USER CODE BEGIN 0 */
-
-/* USER CODE END 0 */
 
 /**
   * @brief  The application entry point.
@@ -63,64 +62,10 @@ int main_main();
   */
 int main(void)
 {
+  tThTimer tmr;
 
-  /* USER CODE BEGIN 1 */
-
-  /* USER CODE END 1 */
-
-  /* MCU Configuration--------------------------------------------------------*/
-
-  /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
-//  HAL_Init();
-
-  /* USER CODE BEGIN Init */
-
-  /* USER CODE END Init */
-
-  /* Configure the system clock */
-  SystemClock_Config();
-
-  /* USER CODE BEGIN SysInit */
-
-  /* USER CODE END SysInit */
-
-  /* Initialize all configured peripherals */
-  MX_GPIO_Init();
-  /* USER CODE BEGIN 2 */
   return main_main();
-  /* USER CODE END 2 */
-
-  /* Infinite loop */
-  /* USER CODE BEGIN WHILE */
-  while (1)
-  {
-    /* USER CODE END WHILE */
-
-    /* USER CODE BEGIN 3 */
-  }
-  /* USER CODE END 3 */
 }
-
-/**
-  * @brief System Clock Configuration
-  * @retval None
-  */
-void SystemClock_Config(void)
-{
-}
-
-/**
-  * @brief GPIO Initialization Function
-  * @param None
-  * @retval None
-  */
-static void MX_GPIO_Init(void)
-{
-}
-
-/* USER CODE BEGIN 4 */
-
-/* USER CODE END 4 */
 
 /**
   * @brief  This function is executed in case of error occurrence.
@@ -128,12 +73,8 @@ static void MX_GPIO_Init(void)
   */
 void Error_Handler(void)
 {
-  /* USER CODE BEGIN Error_Handler_Debug */
-  /* User can add his own implementation to report the HAL error return state */
-  while (1)
-  {
-  }
-  /* USER CODE END Error_Handler_Debug */
+  std::cerr << "Critical failure, terminating" << std::endl;
+  assert(false);
 }
 
 #ifdef  USE_FULL_ASSERT

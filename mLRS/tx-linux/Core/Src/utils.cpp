@@ -8,6 +8,10 @@
 
 //#include "stdstm32.h"
 #include <stdint.h>
+#include <string>
+#include <iostream>
+#include <cassert>
+#include "../../../Common/hal/linux/serial.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -294,7 +298,7 @@ uint32_t i = 0, n = 0;
 
 //-- implicit conversion of integers to BCD string
 
-char ststm32_str[32]; // we hold here a small static string
+char ststm32_str[128]; // we hold here a small static string
 
 
 char* u8toBCD_s(uint8_t n)
@@ -376,3 +380,35 @@ char* u64toHEX_s(uint64_t n)
 #ifdef __cplusplus
 }
 #endif
+
+tLinuxSerialBase::tLinuxSerialBase(const char *tty)
+: tls_tty_name(tty)
+{
+}
+
+void tLinuxSerialBase::Init(void) {}
+
+bool tLinuxSerialBase::available(void) { return false; }
+
+void tLinuxSerialBase::SetBaudRate(uint32_t baud) {}
+void tLinuxSerialBase::putbuf(uint8_t* const buf, uint16_t len)
+{
+  printf("%s: pubuf %u bytes\n", tls_tty_name, len);
+}
+
+char tLinuxSerialBase::getc(void) { return 0; }
+void tLinuxSerialBase::flush(void) {}
+uint16_t tLinuxSerialBase::bytes_available(void) { return 0; }
+
+tLinuxDebugBase::tLinuxDebugBase()
+: tSerialBase()
+{}
+
+void tLinuxDebugBase::putbuf(uint8_t* const buf, uint16_t len)
+{
+  char lbuf[128];
+  memcpy(lbuf, buf, len);
+  lbuf[len] = 0;
+  std::cout << lbuf;
+}
+

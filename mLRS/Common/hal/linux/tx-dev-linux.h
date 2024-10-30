@@ -1,8 +1,13 @@
 #pragma once
 
 #include <unistd.h>
+#include <stdio.h>
+#include <sys/time.h>
 
 #define DEVICE_HAS_JRPIN5
+#define SERIAL_PORT_NAME "/dev/ttyS1"
+#define DEBUG_PORT_NAME  "/dev/ttyS2"
+#define COM_PORT_NAME    "/dev/ttyS3"
 
 #define SYSTICK_DELAY_MS(x)       (uint16_t)(((uint32_t)(x)*(uint32_t)1000)/SYSTICK_TIMESTEP)
 
@@ -133,20 +138,20 @@ bool button_pressed(void)
     return false;
 }
 
-void led_green_off(void) {  }
-void led_green_on(void) {  }
-void led_green_toggle(void) {  }
+void led_green_off(void) { /* printf("led_green_off\n"); */}
+void led_green_on(void) {  printf("led_green_on\n"); }
+void led_green_toggle(void) { printf("led_green_toggle\n");}
 
-void led_red_off(void) {  }
-void led_red_on(void) {  }
-void led_red_toggle(void) {  }
+void led_red_off(void) { printf("led_red_off\n"); }
+void led_red_on(void) { printf("led_red_on\n"); }
+void led_red_toggle(void) {  printf("led_red_toggle\n"); }
 
 void delay_ms(uint32_t ms)
 {
-    sleep(ms);
+    usleep(ms*1000);
 }
 
-volatile uint32_t doSysTask = 0;
+extern volatile uint32_t doSysTask;
 
 uint8_t restart_controller;
 #define INITCONTROLLER_ONCE \
@@ -171,12 +176,16 @@ typedef enum {
 
 volatile uint32_t millis32()
 {
-    return 0;
+    struct timeval tv;
+    gettimeofday(&tv,NULL);
+    return (tv.tv_sec*(uint64_t)1000000+tv.tv_usec)/1000;
 }
 
 uint16_t micros16(void)
 {
-    return 0;
+    struct timeval tv;
+    gettimeofday(&tv,NULL);
+    return tv.tv_sec*(uint64_t)1000000+tv.tv_usec;
 }
 
 void main_loop(void);

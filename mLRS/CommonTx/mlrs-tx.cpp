@@ -8,7 +8,7 @@
 //*******************************************************
 
 
-#define DBG_MAIN(x)
+#define DBG_MAIN(x) dbg.puts(x)
 #define DBG_MAIN_SLIM(x) x
 #define DEBUG_ENABLED
 #define FAIL_ENABLED
@@ -643,7 +643,7 @@ uint8_t rx_status = RX_STATUS_INVALID; // this also signals that a frame was rec
     res = (antenna == ANTENNA_1) ? check_rxframe(&rxFrame) : check_rxframe(&rxFrame2);
 
     if (res) {
-        DBG_MAIN(dbg.puts("fail ");dbg.putc('\n');)
+        DBG_MAIN("fail\n");
 //dbg.puts("fail a");dbg.putc(antenna+'0');dbg.puts(" ");dbg.puts(u8toHEX_s(res));dbg.putc('\n');
     }
 
@@ -699,30 +699,34 @@ INITCONTROLLER_ONCE
     init_once();
 RESTARTCONTROLLER
     init_hw();
-    DBG_MAIN(dbg.puts("\n\n\nHello\n\n");)
+    DBG_MAIN("\n\n\nHello\n\n");
 
+DBG_MAIN("P01\n");
     serial.SetBaudRate(Config.SerialBaudrate);
     serial2.SetBaudRate(Config.SerialBaudrate);
-
+DBG_MAIN("P0\n");
     // startup sign of life
     leds.Init();
-
+DBG_MAIN("P02\n");
     // start up sx
     if (!sx.isOk()) { FAILALWAYS(BLINK_RD_GR_OFF, "Sx not ok"); } // fail!
+DBG_MAIN("CP1\n");
     if (!sx2.isOk()) { FAILALWAYS(BLINK_GR_RD_OFF, "Sx2 not ok"); } // fail!
+DBG_MAIN("P1\n");
     irq_status = irq2_status = 0;
     IF_SX(sx.StartUp(&Config.Sx));
     IF_SX2(sx2.StartUp(&Config.Sx2));
+DBG_MAIN("P1.1\n");
     bind.Init();
+
+#ifndef DEVICE_HAS_NO_SX
     fhss.Init(&Config.Fhss, &Config.Fhss2);
     fhss.Start();
-#ifndef DEVICE_HAS_NO_SX
     rfpower.Init();
-#endif
-
     sx.SetRfFrequency(fhss.GetCurrFreq());
     sx2.SetRfFrequency(fhss.GetCurrFreq2());
-
+#endif
+DBG_MAIN("P2\n");
     tx_tick = 0;
     doPreTransmit = false;
     link_state = LINK_STATE_IDLE;
@@ -764,7 +768,9 @@ RESTARTCONTROLLER
 INITCONTROLLER_END
 
     //-- SysTask handling
-
+#ifdef DEVICE_TGT_LINUX
+    usleep(100);
+#endif
     if (doSysTask) {
         // when we do long tasks, like display transfer, we miss ticks, so we need to catch up
         // the commands below must not be sensitive to strict ms timing
@@ -799,10 +805,11 @@ INITCONTROLLER_END
 
         if (!tick_1hz) {
             dbg.puts(".");
-/*            dbg.puts("\nTX: ");
+            dbg.puts("\nTX: ");
             dbg.puts(u8toBCD_s(stats.GetLQ_serial()));
             dbg.puts("(");
-            dbg.puts(u8toBCD_s(stats.frames_received.GetLQ())); dbg.putc(',');
+            dbg.puts(u8toBCD_s(stats.frames_received.GetLQ()));
+            dbg.putc(',');
             dbg.puts(u8toBCD_s(stats.valid_frames_received.GetLQ()));
             dbg.puts("),");
             dbg.puts(u8toBCD_s(stats.received_LQ_rc)); dbg.puts(", ");
@@ -812,7 +819,7 @@ INITCONTROLLER_END
             dbg.puts(s8toBCD_s(stats.last_snr1)); dbg.puts("; ");
 
             dbg.puts(u16toBCD_s(stats.bytes_transmitted.GetBytesPerSec())); dbg.puts(", ");
-            dbg.puts(u16toBCD_s(stats.bytes_received.GetBytesPerSec())); dbg.puts("; "); */
+            dbg.puts(u16toBCD_s(stats.bytes_received.GetBytesPerSec())); dbg.puts("; ");
         }
     }
 
