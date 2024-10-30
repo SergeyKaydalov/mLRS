@@ -63,6 +63,8 @@ void (*uart_tc_callback_ptr)(void) = &uart_tc_callback_dummy;
 #define UART_RX_CALLBACK_FULL(c)    (*uart_rx_callback_ptr)(c)
 #define UART_TC_CALLBACK()          (*uart_tc_callback_ptr)()
 
+#ifndef DEVICE_TGT_LINUX
+
 #include "../modules/stm32ll-lib/src/stdstm32-uart.h"
 
 // not available in stdstm32-uart.h, used for half-duplex mode
@@ -90,6 +92,24 @@ void uart_rx_putc_torxbuf(uint8_t c)
         uart_rxwritepos = next;
     }
 }
+#else
+void uart_tx_putc_totxbuf(char c)
+{
+/* TODO: implement me */
+}
+
+// not available in stdstm32-uart.h, used for half-duplex mode
+void uart_tx_start(void)
+{
+/* TODO: implement me */
+}
+
+// not available in stdstm32-uart.h, used for full-duplex mode
+void uart_rx_putc_torxbuf(uint8_t c)
+{
+/* TODO: implement me */
+}
+#endif
 
 
 class tPin5BridgeBase
@@ -178,7 +198,9 @@ void tPin5BridgeBase::Init(void)
     JRPIN5_TX_OE_DISABLED;
 #endif
 
+#ifndef DEVICE_TGT_LINUX
     uart_init_isroff();
+#endif
 
 // internal peripheral inverter method, needs a diode from Tx to Rx
 #if defined JRPIN5_RX_TX_INVERT_INTERNAL
@@ -254,6 +276,7 @@ void tPin5BridgeBase::TelemetryStart(void)
 
 void tPin5BridgeBase::pin5_tx_enable(bool enable_flag)
 {
+#ifndef DEVICE_TGT_LINUX
     if (enable_flag) {
         uart_rx_enableisr(DISABLE);
 
@@ -306,6 +329,9 @@ void tPin5BridgeBase::pin5_tx_enable(bool enable_flag)
 
         uart_rx_enableisr(ENABLE);
     }
+#else
+/* TODO: implement me*/
+#endif
 }
 
 
@@ -359,6 +385,7 @@ void tPin5BridgeBase::CheckAndRescue(void)
 #ifdef TX_FRM303_F072CB
             gpio_low(IO_PB9);
 #endif
+#ifndef DEVICE_TGT_LINUX
 #if defined TX_DIY_SXDUAL_MODULE02_G491RE || defined TX_DIY_E28DUAL_MODULE02_G491RE || defined TX_DIY_E22DUAL_MODULE02_G491RE
             gpio_high(IO_PA0);
 #endif
@@ -366,6 +393,7 @@ void tPin5BridgeBase::CheckAndRescue(void)
             pin5_tx_enable(false);
             LL_USART_DisableIT_TC(UART_UARTx);
             LL_USART_ClearFlag_TC(UART_UARTx);
+#endif
         }
     }
 }

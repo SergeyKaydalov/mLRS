@@ -102,6 +102,8 @@ class SxDriverDummy
     int16_t ReceiverSensitivity_dbm(void) { return 0; }
     int8_t RfPower_dbm(void) { return INT8_MIN; }
 
+    uint32_t TimeOverAir_us() { return 0; }
+
     void HandleAFC(void) {}
 };
 
@@ -113,7 +115,7 @@ class SxDriverDummy
 #elif defined DEVICE_HAS_DUAL_SX126x_SX128x
   #include "sx126x_driver.h"
   #include "sx128x_driver.h"
-#else
+#elif !defined DEVICE_HAS_NO_SX
   #include "sx128x_driver.h"
 #endif
 

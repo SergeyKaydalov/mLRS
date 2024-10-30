@@ -38,8 +38,11 @@
 // un-comment to force setup to the below defines, else setup is taken from EEPROM
 //#define SETUP_FORCE_COMMON_CONF
 
-
+#ifdef RFPOWER_DEFAULT
 #define CPOWER                          RFPOWER_DEFAULT
+#else
+#define CPOWER                          0 // 0: minimum power, 255: maximum power
+#endif
 //#define CPOWER                          0 // 0: minimum power, 255: maximum power
 
 #define DIVERSITY                       0

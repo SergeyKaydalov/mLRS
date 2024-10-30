@@ -61,7 +61,7 @@
 #endif
 #include "../Common/hal/esp-timer.h"
 
-#else
+#elif !defined TX_DIY_LINUX
 
 #include "../Common/hal/glue.h"
 #include "../modules/stm32ll-lib/src/stdstm32.h"
@@ -125,7 +125,11 @@
 tRDiversity rdiversity;
 tTDiversity tdiversity;
 tReceiveArq rarq;
-tRfPower rfpower;
+
+#ifndef DEVICE_HAS_NO_SX
+  tRfPower rfpower;
+#endif
+
 tChannelOrder channelOrder(tChannelOrder::DIRECTION_TX_TO_MLRS);
 tConfigId config_id;
 tTxCli cli;
@@ -246,7 +250,9 @@ void stop_bind(void)
 void enter_system_bootloader(void)
 {
     disp.DrawBoot();
+#ifndef DEVICE_TGT_LINUX
     BootLoaderInit();
+#endif
 }
 
 
@@ -302,10 +308,10 @@ void init_hw(void)
 //-------------------------------------------------------
 // SX12xx
 //-------------------------------------------------------
-
 volatile uint16_t irq_status;
 volatile uint16_t irq2_status;
 
+#ifndef DEVICE_HAS_NO_SX
 IRQHANDLER(
 void SX_DIO_EXTI_IRQHandler(void)
 {
@@ -341,6 +347,7 @@ void SX2_DIO_EXTI_IRQHandler(void)
         }
     }
 })
+#endif
 #endif
 
 
@@ -709,7 +716,9 @@ RESTARTCONTROLLER
     bind.Init();
     fhss.Init(&Config.Fhss, &Config.Fhss2);
     fhss.Start();
+#ifndef DEVICE_HAS_NO_SX
     rfpower.Init();
+#endif
 
     sx.SetRfFrequency(fhss.GetCurrFreq());
     sx2.SetRfFrequency(fhss.GetCurrFreq2());

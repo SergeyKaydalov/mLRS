@@ -110,8 +110,10 @@ void tBindBase::ConfigForBind(void)
 
     sx.SetToIdle();
     sx2.SetToIdle();
+#ifndef DEVICE_HAS_NO_SX
     sx.SetRfPower_dbm(rfpower_list[0].dbm);
     sx2.SetRfPower_dbm(rfpower_list[0].dbm);
+#endif
     sx.ResetToLoraConfiguration();
     sx2.ResetToLoraConfiguration();
     sx.SetToIdle();

@@ -64,7 +64,7 @@ void setup_configure_metadata(void)
     SetupMetaData.FrequencyBand_allowed_mask = 0b010000; // 70 cm HAM, not editable
 #elif defined FREQUENCY_BAND_866_MHZ_IN
     SetupMetaData.FrequencyBand_allowed_mask = 0b100000; // 866 MHz IN, not editable
-#else
+#elif !defined DEVICE_HAS_NO_SX
     #error Unknown Frequencyband !
 #endif
 
@@ -96,8 +96,9 @@ void setup_configure_metadata(void)
 #endif
 
     //-- Tx:
-
+#if !defined DEVICE_HAS_NO_SX
     power_optstr_from_rfpower_list(SetupMetaData.Tx_Power_optstr, rfpower_list, RFPOWER_LIST_NUM, 44);
+#endif
 
     // Diversity: "enabled,antenna1,antenna2,r:e t:a1,r:e t:a2"
 #if defined DEVICE_HAS_DUAL_SX126x_SX128x || defined DEVICE_HAS_DUAL_SX126x_SX126x
@@ -153,7 +154,9 @@ void setup_configure_metadata(void)
 
     //-- Rx:
 
+#ifndef DEVICE_HAS_NO_SX
     power_optstr_from_rfpower_list(SetupMetaData.Rx_Power_optstr, rfpower_list, RFPOWER_LIST_NUM, 44);
+#endif
 
     // Rx Diversity: "enabled,antenna1,antenna2,r:e t:a1,r:e t:a2"
 #if defined DEVICE_HAS_DUAL_SX126x_SX128x || defined DEVICE_HAS_DUAL_SX126x_SX126x
@@ -213,7 +216,7 @@ void setup_configure_metadata(void)
 
 void inc_bindphrase_char(char* const s, uint8_t pos)
 {
-    char* cptr = strchr(bindphrase_chars, s[pos]);
+    const char* cptr = strchr(bindphrase_chars, s[pos]);
     uint8_t n = (cptr) ? cptr - bindphrase_chars + 1 : 0; // must not happen that c is not found, but play it safe
     if (n >= strlen(bindphrase_chars)) n = 0;
     s[pos] = bindphrase_chars[n];
@@ -352,12 +355,14 @@ void setup_sanitize_config(uint8_t config_id)
 #elif defined FREQUENCY_BAND_866_MHZ_IN
     uint8_t frequency_band_default = SETUP_FREQUENCY_BAND_866_MHZ_IN;
 #endif
+#ifndef DEVICE_HAS_NO_SX
     if (Setup.Common[config_id].FrequencyBand >= SETUP_FREQUENCY_BAND_NUM) {
         Setup.Common[config_id].FrequencyBand = (SETUP_FREQUENCY_BAND_ENUM)frequency_band_default;
     }
     TST_NOTALLOWED_TYPED(FrequencyBand_allowed_mask, Common[config_id].FrequencyBand, frequency_band_default, SETUP_FREQUENCY_BAND_ENUM);
+#endif
 
-#ifdef DEVICE_HAS_SX128x
+#if defined DEVICE_HAS_SX128x || defined DEVICE_HAS_NO_SX
     constexpr uint8_t fallback_mode = MODE_50HZ;
 #elif defined DEVICE_HAS_DUAL_SX126x_SX128x || defined DEVICE_HAS_DUAL_SX126x_SX126x || defined DEVICE_HAS_SX126x
     constexpr uint8_t fallback_mode = MODE_31HZ;
@@ -379,7 +384,7 @@ void setup_sanitize_config(uint8_t config_id)
     }
 
     //-- Tx:
-
+#ifndef DEVICE_HAS_NO_SX
     SANITIZE(Tx[config_id].Power, RFPOWER_LIST_NUM, SETUP_TX_POWER, RFPOWER_LIST_NUM - 1);
 
     SANITIZE(Tx[config_id].Diversity, DIVERSITY_NUM, SETUP_TX_DIVERSITY, DIVERSITY_DEFAULT);
@@ -405,6 +410,7 @@ void setup_sanitize_config(uint8_t config_id)
     TST_NOTALLOWED(Tx_Buzzer_allowed_mask, Tx[config_id].Buzzer, BUZZER_OFF);
 
     SANITIZE(Tx[config_id].PowerSwitchChannel, POWER_SWITCH_CHANNEL_NUM, POWER_SWITCH_CHANNEL_OFF, POWER_SWITCH_CHANNEL_OFF);
+#endif
 
     // device cannot use mBridge (pin5) and CRSF (pin5) at the same time !
     // dest\src | NONE    | CRSF    | INPORT  | MBRIDGE
@@ -428,11 +434,12 @@ void setup_sanitize_config(uint8_t config_id)
 #endif
 
     //-- Rx:
-
+#ifndef DEVICE_HAS_NO_SX
     SANITIZE(Rx.Power, RFPOWER_LIST_NUM, SETUP_RX_POWER, RFPOWER_LIST_NUM - 1);
 
     SANITIZE(Rx.Diversity, DIVERSITY_NUM, SETUP_RX_DIVERSITY, DIVERSITY_DEFAULT);
     TST_NOTALLOWED(Rx_Diversity_allowed_mask, Rx.Diversity,  DIVERSITY_ANTENNA1);
+#endif
 
     SANITIZE(Rx.ChannelOrder, CHANNEL_ORDER_NUM, SETUP_RX_CHANNEL_ORDER, CHANNEL_ORDER_AETR);
 
@@ -668,7 +675,7 @@ void setup_configure_config(uint8_t config_id)
     //-- Sx12xx
 
     // note: the actually used power will be determined later when the SX are set up
-#ifdef DEVICE_IS_TRANSMITTER
+#if defined DEVICE_IS_TRANSMITTER && !defined DEVICE_HAS_NO_SX
     Config.Sx.Power_dbm = rfpower_list[Setup.Tx[config_id].Power].dbm;
 #endif
 #ifdef DEVICE_IS_RECEIVER
@@ -866,7 +873,6 @@ void setup_clear(void)
     memset((uint8_t*)&Setup, 0xff, sizeof(tSetup));
 }
 
-
 EE_STATUS_ENUM setup_store_to_EEPROM(void)
 {
     return ee_writedata(&Setup, sizeof(tSetup));
@@ -878,13 +884,11 @@ EE_STATUS_ENUM setup_retrieve_from_EEPROM(void)
     return ee_readdata(&Setup, sizeof(tSetup));
 }
 
-
 void setup_reload(void)
 {
     setup_retrieve_from_EEPROM();
     setup_sanitize_config(Config.ConfigId);
 }
-
 
 //-------------------------------------------------------
 // Init

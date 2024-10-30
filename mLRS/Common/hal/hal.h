@@ -91,6 +91,10 @@ Note: Some "high-level" features are set for each device in the device_conf.h fi
 #include "device_conf.h"
 
 
+#ifdef TX_DIY_LINUX
+#include "linux/tx-dev-linux.h"
+#endif
+
 //-- MATEKSYS mLRS devices
 
 #ifdef RX_MATEK_MR24_30_G431KB
@@ -258,7 +262,9 @@ Note: Some "high-level" features are set for each device in the device_conf.h fi
 //-------------------------------------------------------
 // should go somewhere else !?
 
+#ifndef DEVICE_HAS_NO_SX
 #define RFPOWER_LIST_NUM  sizeof(rfpower_list)/sizeof(rfpower_t)
+#endif
 
 
 #ifdef DEVICE_IS_RECEIVER
@@ -360,6 +366,8 @@ Note: Some "high-level" features are set for each device in the device_conf.h fi
   #define SX_DRIVER Sx126xDriver
 #elif defined DEVICE_HAS_SX127x
   #define SX_DRIVER Sx127xDriver
+#elif defined DEVICE_HAS_NO_SX
+  #define SX_DRIVER SxDriverDummy
 #else
   #define SX_DRIVER Sx128xDriver
 #endif
@@ -429,13 +437,15 @@ Note: Some "high-level" features are set for each device in the device_conf.h fi
 #endif
 
 #if !defined DEVICE_HAS_SX128x && !defined DEVICE_HAS_SX127x && !defined DEVICE_HAS_SX126x && \
-    !defined DEVICE_HAS_DUAL_SX126x_SX128x && !defined DEVICE_HAS_DUAL_SX126x_SX126x
+    !defined DEVICE_HAS_DUAL_SX126x_SX128x && !defined DEVICE_HAS_DUAL_SX126x_SX126x && \
+    !defined DEVICE_HAS_NO_SX
   #error Must be either SX128x or SX127x or SX126x !
 #endif
 
 #if !defined FREQUENCY_BAND_2P4_GHZ && \
     !defined FREQUENCY_BAND_915_MHZ_FCC && !defined FREQUENCY_BAND_868_MHZ && !defined FREQUENCY_BAND_866_MHZ_IN && \
-    !defined FREQUENCY_BAND_433_MHZ && !defined FREQUENCY_BAND_70_CM_HAM
+    !defined FREQUENCY_BAND_433_MHZ && !defined FREQUENCY_BAND_70_CM_HAM && \
+    !defined DEVICE_HAS_NO_SX
   #error At least one frequency band must be defined !
 #endif
 

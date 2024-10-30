@@ -371,6 +371,13 @@ The default selection of frequency bands can be overruled by feature defines.
   #define FREQUENCY_BAND_433_MHZ // only one 400 MHz option can be chosen
 #endif
 
+#ifdef TX_DIY_LINUX
+  #define DEVICE_NAME "LINUX-based TX"
+  #define DEVICE_IS_TRANSMITTER
+  #define DEVICE_HAS_NO_SX
+  #define DEVICE_TGT_LINUX
+#endif
+
 
 //-------------------------------------------------------
 // ESP Boards

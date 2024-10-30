@@ -65,6 +65,8 @@ class tSerialPort : public tSerialBase
     char getc(void) override { IFNSER(0); return usb_getc(); }
     void flush(void) override { IFNSER(); usb_flush(); }
     uint16_t bytes_available(void) override { IFNSER(0); return usb_rx_bytesavailable(); }
+#elif defined DEVICE_TGT_LINUX
+    /* TODO: implement it for Linux */
 #else
     void Init(void) override { uartb_init(); SERORCOM_INIT; }
     void SetBaudRate(uint32_t baud) override { IFNSER(); uartb_setprotocol(baud, XUART_PARITY_NO, UART_STOPBIT_1); }
@@ -120,6 +122,7 @@ class tDebugPort : public tSerialBase
 #ifdef DEVICE_HAS_DEBUG_SWUART
     void Init(void) { swuart_init(); }
     void putbuf(uint8_t* const buf, uint16_t len) override { swuart_putbuf(buf, len); }
+#elif defined DEVICE_TGT_LINUX
 #else
     void Init(void) { uartf_init(); }
     void putbuf(uint8_t* const buf, uint16_t len) override { uartf_putbuf(buf, len); }
@@ -154,6 +157,7 @@ class tComPort : public tSerialBase
     void putbuf(uint8_t* const buf, uint16_t len) override { usb_putbuf(buf, len); }
     bool available(void) override { return usb_rx_available(); }
     char getc(void) override { return usb_getc(); }
+#elif defined DEVICE_TGT_LINUX
 #else
     void Init(void) override { uartc_init(); }
     void putbuf(uint8_t* const buf, uint16_t len) override { uartc_putbuf(buf, len); }

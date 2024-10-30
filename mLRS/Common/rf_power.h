@@ -10,7 +10,7 @@
 #define RF_POWER_H
 #pragma once
 
-
+#ifndef DEVICE_HAS_NO_SX
 #include "hal/hal.h"
 
 
@@ -138,7 +138,7 @@ void tRfPower::Set(tRcData* const rc, uint8_t power_switch_channel, uint8_t powe
 
     rfpower_new_idx = new_idx;
 }
-
+#endif
 
 #endif // RF_POWER_H
 
