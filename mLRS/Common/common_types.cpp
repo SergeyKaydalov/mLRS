@@ -390,7 +390,7 @@ uint32_t u32_from_bindphrase(char* const bindphrase)
 
     for (uint8_t i = 0; i < 6; i++) {
 
-        char* cptr = strchr(bindphrase_chars, bindphrase[i]);
+        const char* cptr = strchr(bindphrase_chars, bindphrase[i]);
         uint8_t n = (cptr) ? cptr - bindphrase_chars : 0; // must not happen that c is not found, but play it safe
 
         v += n * base;
@@ -409,7 +409,7 @@ uint8_t except_from_bindphrase(char* const bindphrase)
         return (c - '0') % 5; // no, #1, #6, #11, #13 = 5 cases = EXCEPT_NUM
     }
 
-    char* cptr = strchr(bindphrase_chars, c);
+    const char* cptr = strchr(bindphrase_chars, c);
     uint8_t n = (cptr) ? cptr - bindphrase_chars : 0; // must not happen that c is not found, but play it safe
 
     return n % 5; // no, #1, #6, #11, #13 = 5 cases = EXCEPT_NUM

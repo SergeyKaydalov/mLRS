@@ -7,6 +7,7 @@ set(CMAKE_CXX_STANDARD 17)
 
 set(SOURCE_FILES
         Core/Src/main.cpp
+        Core/Src/utils.cpp
         ../CommonTx/mlrs-tx.cpp
         ../CommonTx/config_id.cpp
         ../CommonTx/in.cpp

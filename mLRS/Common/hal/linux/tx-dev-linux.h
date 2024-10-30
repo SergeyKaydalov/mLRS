@@ -41,6 +41,9 @@
 //  STD string handling routines
 //-------------------------------------------------------
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 //-- conversion of integers to BCD string
 
 void u8toBCDstr(uint8_t n, char* s);
@@ -93,6 +96,10 @@ char* u8toHEX_s(uint8_t n);
 char* u16toHEX_s(uint16_t n);
 char* u32toHEX_s(uint32_t n);
 char* u64toHEX_s(uint64_t n);
+#ifdef __cplusplus
+}
+#endif
+
 
 #define __REV16(x)  __builtin_bswap16(x)
 #define __REVSH(x)  __builtin_bswap16(x)
@@ -139,7 +146,9 @@ void delay_ms(uint32_t ms)
     sleep(ms);
 }
 
-extern uint8_t restart_controller;
+volatile uint32_t doSysTask = 0;
+
+uint8_t restart_controller;
 #define INITCONTROLLER_ONCE \
     if(restart_controller <= 1){ \
     if(restart_controller == 0){
@@ -152,12 +161,34 @@ extern uint8_t restart_controller;
     restart_controller = 1; \
     return;
 
+
+typedef enum {
+    SX_IRQ_TX_DONE = SX1280_IRQ_TX_DONE,
+    SX_IRQ_RX_DONE = SX1280_IRQ_RX_DONE,
+    SX_IRQ_TIMEOUT = SX1280_IRQ_RX_TX_TIMEOUT,
+    SX_IRQ_ALL     = SX1280_IRQ_ALL,
+} SX_IRQ_ENUM;
+
+volatile uint32_t millis32()
+{
+    return 0;
+}
+
+uint16_t micros16(void)
+{
+    return 0;
+}
+
+void main_loop(void);
+int main_main(void) { while(1) main_loop(); }
+
 #define __disable_irq()
 #define __enable_irq()
 #define delay_init()
 #define timer_init()
 #define leds_init()
 #define button_init()
+#define stack_check_init()
 
 #ifndef STATIC_ASSERT
 #define STATIC_ASSERT_(cond,msg)  static_assert((cond),msg);

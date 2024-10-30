@@ -823,10 +823,13 @@ INITCONTROLLER_END
         break;
 
     case LINK_STATE_TRANSMIT:
+
+#ifndef DEVICE_HAS_NO_SX
         rfpower.Update();
         fhss.HopToNext();
         sx.SetRfFrequency(fhss.GetCurrFreq());
         sx2.SetRfFrequency(fhss.GetCurrFreq2());
+#endif
         do_transmit(tdiversity.Antenna());
         link_state = LINK_STATE_TRANSMIT_WAIT;
         irq_status = irq2_status = 0;
@@ -1064,7 +1067,9 @@ IF_MBRIDGE(
         if (Setup.Tx[Config.ConfigId].ChannelsSource == CHANNEL_SOURCE_MBRIDGE) {
             channelOrder.Set(Setup.Tx[Config.ConfigId].ChannelOrder); //TODO: better than before, but still better place!?
             channelOrder.Apply(&rcData);
+#ifndef DEVICE_HAS_NO_SX
             rfpower.Set(&rcData, Setup.Tx[Config.ConfigId].PowerSwitchChannel, Setup.Tx[Config.ConfigId].Power);
+#endif
         }
         // when we receive channels packet from transmitter, we send link stats to transmitter
         mbridge.TelemetryStart();
@@ -1128,7 +1133,9 @@ IF_CRSF(
         // update channels
         channelOrder.Set(Setup.Tx[Config.ConfigId].ChannelOrder); //TODO: better than before, but still better place!?
         channelOrder.Apply(&rcData);
+#ifndef DEVICE_HAS_NO_SX
         rfpower.Set(&rcData, Setup.Tx[Config.ConfigId].PowerSwitchChannel, Setup.Tx[Config.ConfigId].Power);
+#endif
     }
     uint8_t crsftask; uint8_t crsfcmd;
     uint8_t mbcmd; static uint8_t do_cnt = 0; // if it's too fast Lua script gets out of sync
