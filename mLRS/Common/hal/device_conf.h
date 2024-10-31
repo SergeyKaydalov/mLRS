@@ -423,7 +423,7 @@ The default selection of frequency bands can be overruled by feature defines.
 
 
 #define USE_FEATURE_MAVLINKX
-#if defined TX_FRM303_F072CB || defined RX_FRM303_F072CB // is short of RAM for tx, and possibly too slow
+#if defined TX_FRM303_F072CB || defined RX_FRM303_F072CB || defined TX_DIY_LINUX// is short of RAM for tx, and possibly too slow
   #undef USE_FEATURE_MAVLINKX
 #endif
 

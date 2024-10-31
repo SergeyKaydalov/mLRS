@@ -701,22 +701,16 @@ RESTARTCONTROLLER
     init_hw();
     DBG_MAIN("\n\n\nHello\n\n");
 
-DBG_MAIN("P01\n");
     serial.SetBaudRate(Config.SerialBaudrate);
     serial2.SetBaudRate(Config.SerialBaudrate);
-DBG_MAIN("P0\n");
     // startup sign of life
     leds.Init();
-DBG_MAIN("P02\n");
     // start up sx
     if (!sx.isOk()) { FAILALWAYS(BLINK_RD_GR_OFF, "Sx not ok"); } // fail!
-DBG_MAIN("CP1\n");
     if (!sx2.isOk()) { FAILALWAYS(BLINK_GR_RD_OFF, "Sx2 not ok"); } // fail!
-DBG_MAIN("P1\n");
     irq_status = irq2_status = 0;
     IF_SX(sx.StartUp(&Config.Sx));
     IF_SX2(sx2.StartUp(&Config.Sx2));
-DBG_MAIN("P1.1\n");
     bind.Init();
 
 #ifndef DEVICE_HAS_NO_SX

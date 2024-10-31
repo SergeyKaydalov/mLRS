@@ -17,12 +17,13 @@
   */
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
-#include "../Inc/main.h"
 #include <iostream>
 #include <chrono>
 #include <thread>
 #include <utility>
 #include <cassert>
+#include <cstdint>
+#include "../Inc/main.h"
 
 /* The systick source */
 volatile uint32_t doSysTask;

@@ -3,6 +3,9 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <sys/time.h>
+#include <assert.h>
+#include "eeprom.h"
+
 
 #define DEVICE_HAS_JRPIN5
 #define SERIAL_PORT_NAME "/dev/ttyS1"
@@ -110,28 +113,6 @@ char* u64toHEX_s(uint64_t n);
 #define __REVSH(x)  __builtin_bswap16(x)
 #define __REV(x)    __builtin_bswap32(x)
 
-typedef enum {
-    EE_STATUS_FLASH_FAIL = 0, // indicates failure in hal functions
-    EE_STATUS_PAGE_UNDEF,
-    EE_STATUS_PAGE_EMPTY,
-    EE_STATUS_PAGE_FULL,
-    EE_STATUS_OK
-} EE_STATUS_ENUM;
-
-EE_STATUS_ENUM ee_writedata(void* data, uint16_t datalen)
-{
-    return EE_STATUS_OK;
-}
-
-EE_STATUS_ENUM ee_readdata(void* data, uint16_t datalen)
-{
-    return EE_STATUS_OK;
-}
-
-EE_STATUS_ENUM ee_init(void)
-{
-    return EE_STATUS_OK;
-}
 
 bool button_pressed(void)
 {
@@ -166,12 +147,14 @@ uint8_t restart_controller;
     restart_controller = 1; \
     return;
 
-
+/* The following enum is defined for each sx12xx type
+ * SO the linux port introduces its own, must be remover later on
+ */
 typedef enum {
-    SX_IRQ_TX_DONE = SX1280_IRQ_TX_DONE,
-    SX_IRQ_RX_DONE = SX1280_IRQ_RX_DONE,
-    SX_IRQ_TIMEOUT = SX1280_IRQ_RX_TX_TIMEOUT,
-    SX_IRQ_ALL     = SX1280_IRQ_ALL,
+    SX_IRQ_TX_DONE = 1,
+    SX_IRQ_RX_DONE = 2,
+    SX_IRQ_TIMEOUT = 4,
+    SX_IRQ_ALL     = 8,
 } SX_IRQ_ENUM;
 
 volatile uint32_t millis32()
